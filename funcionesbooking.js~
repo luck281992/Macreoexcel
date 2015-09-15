@@ -1,0 +1,102 @@
+function guardarpro(tidVentana, tmodo){
+
+	alert("funcion todavia no implementada");
+	if(!(gEstado==5 || gEstado==4)){
+		return;
+	}
+	//preparamos pantalla para guardar
+	gEstadot=gEstado;
+	gEstado = 6;
+	botonespro(tidVentana);
+	document.getElementById("divpro" + tidVentana).className = "DivProVisible";
+
+	var clave  = 0;
+
+	//Validar el almacenado del encabezado de boleta
+	tDatosbol=document.getElementById('txtfolio').value;
+	tDatoscliente = document.getElementById('txtclientealias').value;
+	tDatosorigen = document.getElementById('txtdestinoalias').value;
+	tDatosbuque = document.getElementById('txtbuque').value;
+	tDatosnota = document.getElementById('txtnotabol').value;
+	tDatosfecha = document.getElementById('txtfechabol').value;
+	if(tDatosbol==0)tNuevo=1; else tNuevo=0;
+	sFec=new Date();
+	jQuery.ajax({
+	  type: "GET",
+	  url: "php/clase/"+MostrarDatosPro(tidVentana)+"/guardarbol.php",
+	  data: "idVentana="+tidVentana+"&dato="+sFec+"&clientealias='"+tDatoscliente+"'&origenalias='"+tDatosorigen+"'&buque='"+tDatosbuque+"'&nota="+tDatosnota+"&fecha='"+guardarfecha(tDatosfecha)+"'&clave="+tDatosbol,
+	  async: false,	  
+	  success: function(msg){
+		  clave = parseInt(msg);
+		  if (clave<=0) {
+		  	gEstado=gEstadot;
+		  	document.getElementById("divcaptura" + tidVentana).className = "DivVisible";
+		  	document.getElementById("divfiltro" + tidVentana).className = "DivInvisible";
+		  	botonespro(tidVentana);
+		  	document.getElementById("divpro" + tidVentana).className = "DivInvisible";
+			document.getElementById("msgbolexp").innerHTML = "&nbsp;&nbsp;"+msg;
+			document.getElementById("msgbolexp").style.display = "inline";
+			document.getElementById("divbguardarcomo"+tidVentana).className = "BotonInvisible";
+		  } else {
+		  	guardarbolexpveh(tidVentana,clave,tNuevo,tmodo);
+		  }
+		  if(clave>0){
+			document.getElementById('txtfolio').value=clave;
+		  }
+		  tem = clave;
+		}
+	});
+	GC = 0;
+	document.getElementById("divcontenido-boleta").style.background = "#FFF";
+	return tem;
+}
+
+//usuario: jesus javier sanchez guerrero
+//fecha: 29/08/2014
+//resumen
+//esta funcion tiene dos parametros 1 es el nombre del buque 
+//el 2 es para saber que ventana es, le mando esos datos junto con valor en una pestaña nueva
+//valor es igual a 2 para indentificar que la funncion a llamar en el archivo funcionesexcel 
+//es la de generar
+function expoxls(buque,tidVentana){
+	if(buque==""){
+	  alert("Es necesario informacion de buque!");
+	}else{
+	valor=2;
+	sFec=new Date();
+	window.open("php/clase/"+MostrarDatosPro(tidVentana)+"/funcionesexcel.php?idVentana="+tidVentana+"&buq="+buque+"&valor="+valor+"&dato="+sFec);
+	}
+}
+
+function ocultarfila(fila){
+
+	document.getElementById('filaocultar'+fila).className = "DivInvisible";
+
+}
+//borrar registro escogido
+function borrarfila(tidVentana,id,fila){
+	document.getElementById("divmsg" + tidVentana).className="DivInvisible";
+	document.getElementById("divmsgbien" + tidVentana).className="DivInvisible";
+
+	if (window.confirm("Seguro que desea borrar este registro?") == true) 
+	{
+		sFec=new Date();
+		jQuery.ajax({
+		  type: "GET",
+		  url: "php/clase/"+MostrarDatosPro(tidVentana)+"/borrarbooking.php",
+		  data: "idVentana="+tidVentana+"&dato="+sFec+"&noregistro="+id,
+		  async: false,	  
+		  success: function(msg){
+		  		clave = parseInt(msg);
+			  if(clave==1){
+			     document.getElementById('filaocultar'+fila).className = "DivInvisible";
+			  }
+			  else{
+			  	
+			  		alert("Error"+msg);
+			  }
+			}
+		});
+	} 
+}
+
